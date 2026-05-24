@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SMC A+ Setup Bot Controller</title>
+    <style>
+        body { font-family: Arial; text-align: center; background: #121212; color: white; padding: 50px; }
+        .btn { padding: 20px 40px; font-size: 20px; border-radius: 10px; cursor: pointer; border: none; }
+        .on { background: green; color: white; }
+        .off { background: red; color: white; }
+        #status { font-size: 24px; margin-top: 20px; color: #ffeb3b; }
+    </style>
+</head>
+<body>
+
+    <h1>SMC/ICT A+ Setup Auto-Trader</h1>
+    
+    <!-- Bot On/Off Switch -->
+    <button id="botBtn" class="btn off" onclick="toggleBot()">BOT IS OFF</button>
+    
+    <div id="status">ገበያውን በመከታተል ላይ... (SMC A+ Setup)</div>
+
+    <script>
+        let isBotActive = false;
+
+        function toggleBot() {
+            const btn = document.getElementById("botBtn");
+            isBotActive = !isBotActive;
+            
+            if (isBotActive) {
+                btn.className = "btn on";
+                btn.innerText = "BOT IS ON";
+                document.getElementById("status").innerText = "Bot Active: Watching for A+ Setups...";
+                startWatching();
+            } else {
+                btn.className = "btn off";
+                btn.innerText = "BOT IS OFF";
+                document.getElementById("status").innerText = "Bot Stopped.";
+            }
+        }
+
+        // ገበያውን ለመከታተል እና ወደ MT5 ለመላክ (MetaApi በመጠቀም)
+        async function startWatching() {
+            if (!isBotActive) return;
+
+            // እዚህ ላይ የ SMC/ICT A+ Setup ሎጂክ ይሰራል
+            // ለምሳሌ፡ FVG እና Liquidity Sweep ከተገኘ፡
+            let aPlusSetupFound = true; // በገበያው ሁኔታ ላይ ተመስርቶ የሚቀየር
+
+            if (aPlusSetupFound) {
+                document.getElementById("status").innerText = "🚀 A+ Setup Found! Sending Order to MT5...";
+                sendOrderToMT5("BUY", 0.10); // 0.10 ሎት ግዛ
+            }
+        }
+
+        // ትዕዛዙን ወደ MT5 መላኪያ ፈንክሽን
+        async function sendOrderToMT5(action, lotSize) {
+            // ይህ ኮድ በ MetaApi በኩል ከ MT5 ጋር ይገናኛል
+            const metaApiUrl = "https://mt-client-api-v1.new-york.agiliumtrade.ai/users/current/accounts/YOUR_ACCOUNT_ID/orders";
+            
+            const response = await fetch(metaApiUrl, {
+                method: 'POST',
+                headers: {
+                    'auth-token': 'YOUR_META_API_TOKEN',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    symbol: 'XAUUSD',
+                    actionType: action === "BUY" ? "ORDER_TYPE_BUY" : "ORDER_TYPE_SELL",
+                    volume: lotSize
+                })
+            });
+
+            const result = await response.json();
+            console.log("MT5 Response:", result);
+        }
+    </script>
+</body>
+</html>
